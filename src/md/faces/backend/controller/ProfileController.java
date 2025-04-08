@@ -1,76 +1,67 @@
 package md.faces.backend.controller;
 
+import jakarta.servlet.ServletConfig;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import md.faces.backend.model.Gender;
 import md.faces.backend.model.Profile;
 import md.faces.backend.service.ProfileService;
 
-import javax.swing.text.html.Option;
-import java.util.List;
+import java.io.IOException;
 import java.util.Optional;
 
-public class ProfileController {
 
-    private final  ProfileService profService;
+@WebServlet("/profile")
+public class ProfileController extends HttpServlet {
 
-    public ProfileController(ProfileService profService) {
-        this.profService = profService;
+    private final  ProfileService profService = ProfileService.getInstance();
+
+    @Override
+    public void init(ServletConfig config) throws ServletException {
+        ServletContext servletContext = config.getServletContext();
+        if (servletContext.getAttribute("genders") == null) {
+            servletContext.setAttribute("genders", Gender.values());
+        }
     }
 
-    public String save(String request) {
-        String[] strings = request.split(",");
-        if(strings.length !=4) return "Bad request";
+    @Override
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        String id = req.getParameter("id");
+        String url = "/notFound";
 
+        if (id != null) {
+            Optional<Profile> optional = profService.findById(Long.parseLong(id));
+            if (optional.isPresent()) {
+                req.setAttribute("profile", optional.get());
+                url = "WEB-INF/jsp/profile.jsp";
+            }
+        }
+        req.getRequestDispatcher(url).forward(req, resp);
+    }
+
+    @Override
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        String sId = req.getParameter("id");
         Profile profile = new Profile();
-        profile.setFirstName(strings[0]);
-        profile.setLastName(strings[1]);
-        profile.setEmail(strings[2]);
-        profile.setAboutMe(strings[3]);
+        profile.setEmail(req.getParameter("email"));
+        profile.setFirstName(req.getParameter("firstName"));
+        profile.setLastName(req.getParameter("lastName"));
+        profile.setAboutMe(req.getParameter("aboutMe"));
+        profile.setGender(Gender.valueOf(req.getParameter("gender")));
+        Long id;
 
-        return profService.save(profile).toString();
-    }
-
-    public Optional<Profile> findById(Long id) {
-        return profService.findById(id);
-    }
-
-    public List<Profile> findAll() {
-        return profService.findAll();
-    }
-
-    public String update(String request) {
-        String[] strings = request.split(",");
-        if(strings.length != 5) return "Bad request";
-
-        long id;
-        try{ id = Long.parseLong(strings[0]);
-        } catch (NumberFormatException e) {
-            return "Bad request. cannot parse id";}
-
-        Profile profile = new Profile();
-        profile.setId(id);
-        profile.setFirstName(strings[1]);
-        profile.setLastName(strings[2]);
-        profile.setEmail(strings[3]);
-        profile.setAboutMe(strings[4]);
-
-        profService.update(profile);
-
-        return "Profile " + profile.getId() + " updated";
-    }
-
-
-    public String delete(String request) {
-        String[] strings = request.split(",");
-        if(strings.length != 1) return "Bad request";
-
-        long id;
-        try{ id = Long.parseLong(strings[0]);
-        } catch (NumberFormatException e) {
-            return "Bad request. cannot parse id";
+        if (!sId.isBlank()){
+            id = Long.parseLong(sId);
+            profile.setId(id);
+            profService.update(profile);
+        } else {
+            id = profService.save(profile).getId();
         }
 
-        boolean deleted = profService.delete(id);
-        if (!deleted) return "Profile " + id + " not found!";
-
-        return "Profile " + id + " deleted";
+        resp.sendRedirect(String.format("/profile?id=%s", id));
     }
 }

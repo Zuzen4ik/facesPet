@@ -7,11 +7,17 @@ import java.util.List;
 import java.util.Optional;
 
 public class ProfileService {
-    private final ProfileDao profDao;
 
-    public ProfileService(ProfileDao profDao) {
-        this.profDao = profDao;
+    private static final ProfileService INSTANCE = new ProfileService();
+
+    private ProfileService() {}
+
+    public static ProfileService getInstance() {
+        return INSTANCE;
     }
+
+    private final ProfileDao profDao = ProfileDao.getInstance();
+
 
     public Profile save(Profile profile) {
         return profDao.addProfile(profile);
