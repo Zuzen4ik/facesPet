@@ -20,13 +20,6 @@ public class ProfileController extends HttpServlet {
 
     private final  ProfileService profService = ProfileService.getInstance();
 
-    @Override
-    public void init(ServletConfig config) throws ServletException {
-        ServletContext servletContext = config.getServletContext();
-        if (servletContext.getAttribute("genders") == null) {
-            servletContext.setAttribute("genders", Gender.values());
-        }
-    }
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -44,24 +37,44 @@ public class ProfileController extends HttpServlet {
     }
 
     @Override
-    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+
+        Profile profile = getProfile(req);
+        Long id = profService.save(profile).getId();
+        resp.sendRedirect(String.format("/profile?id=%s", id));
+    }
+
+
+
+    @Override
+    protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        Profile profile = getProfile(req);
+        profService.update(profile);
+        resp.sendRedirect(String.format("/profile?id=%s", profile.getId()));
+    }
+
+    @Override
+    protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         String sId = req.getParameter("id");
+        if (!sId.isBlank()){
+            profService.delete(Long.parseLong(sId));
+        }
+        resp.sendRedirect("/registration");
+    }
+
+    private Profile getProfile(HttpServletRequest req) {
+        String sId = req.getParameter("id");
+
         Profile profile = new Profile();
+
+        if (!sId.isBlank()){
+            profile.setId(Long.parseLong(sId));
+        }
         profile.setEmail(req.getParameter("email"));
         profile.setFirstName(req.getParameter("firstName"));
         profile.setLastName(req.getParameter("lastName"));
         profile.setAboutMe(req.getParameter("aboutMe"));
         profile.setGender(Gender.valueOf(req.getParameter("gender")));
-        Long id;
-
-        if (!sId.isBlank()){
-            id = Long.parseLong(sId);
-            profile.setId(id);
-            profService.update(profile);
-        } else {
-            id = profService.save(profile).getId();
-        }
-
-        resp.sendRedirect(String.format("/profile?id=%s", id));
+        return profile;
     }
 }
