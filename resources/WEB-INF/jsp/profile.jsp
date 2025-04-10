@@ -7,7 +7,7 @@
   </head>
   <body>
 
-  <%@ include file="header.html" %>
+  <%@ include file="header.jsp" %>
   <div>
       <form method="post" action="/profile">
         <c:if test="${requestScope.profile.id != null}">
@@ -18,23 +18,23 @@
           <td><input type="text" name="id" hidden value="${requestScope.profile.id}"></td>
 
           <tr>
-            <td>Email</td>
+            <td>${requestScope.wordBundle.get("Email")}</td>
             <td><input type="email" name="email" value="${requestScope.profile.email}"></td>
           </tr>
           <tr>
-            <td>Firstname</td>
+            <td>${requestScope.wordBundle.get("firstname")}</td>
             <td><input type="text" name="firstName" value="${requestScope.profile.firstName}"></td>
           </tr>
           <tr>
-            <td>Lastname</td>
+            <td>${requestScope.wordBundle.get("lastname")}</td>
             <td><input type="text" name="lastName" value="${requestScope.profile.lastName}"></td>
           </tr>
           <tr>
-            <td>About</td>
+            <td>${requestScope.wordBundle.get("aboutme")}</td>
             <td><input type="text" name="aboutMe" value="${requestScope.profile.aboutMe}"></td>
           </tr>
           <tr>
-            <td>Select Gender</td>
+            <td>${requestScope.wordBundle.get("gender")}</td>
             <td><select name="gender">
               <option value="${requestScope.profile.gender}" selected hidden="">${requestScope.profile.gender}</option>
 
@@ -44,20 +44,20 @@
             </select></td>
           </tr>
         </table>
-        <button type="submit">Save</button>
+        <button type="submit">${requestScope.wordBundle.get("save")}</button>
       </form>
 
     <c:if test="${requestScope.profile.id != null}">
       <form method="post" action="/profile">
         <input type="hidden" name="_method" value="DELETE">
         <input type="hidden" name="id" value="${requestScope.profile.id}">
-        <button type="submit">Delete</button>
+        <button type="submit">${requestScope.wordBundle.get("delete")}</button>
       </form>
 
     </c:if>
     </div>
 
-    <%@ include file="footer.html" %>
+    <%@ include file="footer.jsp" %>
 
   </body>
 </html>
