@@ -7,11 +7,14 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import md.faces.backend.dto.ProfilegetDto;
+import md.faces.backend.mapper.ServletRequestToProfileDtoMapper;
 import md.faces.backend.model.Gender;
 import md.faces.backend.model.Profile;
 import md.faces.backend.service.ProfileService;
 
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.Optional;
 
 
@@ -19,6 +22,7 @@ import java.util.Optional;
 public class ProfileController extends HttpServlet {
 
     private final  ProfileService profService = ProfileService.getInstance();
+    private final ServletRequestToProfileDtoMapper reqToDtoMapper = ServletRequestToProfileDtoMapper.getInstance();
 
 
     @Override
@@ -27,11 +31,14 @@ public class ProfileController extends HttpServlet {
         String url = "/notFound";
 
         if (id != null) {
-            Optional<Profile> optional = profService.findById(Long.parseLong(id));
+            Optional<ProfilegetDto> optional = profService.findById(Long.parseLong(id));
             if (optional.isPresent()) {
                 req.setAttribute("profile", optional.get());
                 url = "WEB-INF/jsp/profile.jsp";
             }
+        } else {
+            req.setAttribute("profiles", profService.findAll());
+            url = "WEB-INF/jsp/profiles.jsp";
         }
         req.getRequestDispatcher(url).forward(req, resp);
     }
@@ -39,8 +46,8 @@ public class ProfileController extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
 
-        Profile profile = getProfile(req);
-        Long id = profService.save(profile).getId();
+        ProfilegetDto profile = reqToDtoMapper.from(req);
+        Long id = profService.save(profile);
         resp.sendRedirect(String.format("/profile?id=%s", id));
     }
 
@@ -48,7 +55,7 @@ public class ProfileController extends HttpServlet {
 
     @Override
     protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        Profile profile = getProfile(req);
+        ProfilegetDto profile = reqToDtoMapper.from(req);
         profService.update(profile);
         resp.sendRedirect(String.format("/profile?id=%s", profile.getId()));
     }
@@ -74,6 +81,7 @@ public class ProfileController extends HttpServlet {
         profile.setFirstName(req.getParameter("firstName"));
         profile.setLastName(req.getParameter("lastName"));
         profile.setAboutMe(req.getParameter("aboutMe"));
+        profile.setBirthDate(LocalDate.parse(req.getParameter("birthDate")));
         profile.setGender(Gender.valueOf(req.getParameter("gender")));
         return profile;
     }

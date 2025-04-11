@@ -30,6 +30,14 @@
             <td><input type="text" name="lastName" value="${requestScope.profile.lastName}"></td>
           </tr>
           <tr>
+            <td>${requestScope.wordBundle.get("birth-date")}</td>
+            <td><input type="date" name="birthDate" value="${requestScope.profile.birthDate}"></td>
+          </tr>
+          <tr>
+            <td>${requestScope.wordBundle.get("age")}</td>
+            <td>${requestScope.profile.age}</td>
+          </tr>
+          <tr>
             <td>${requestScope.wordBundle.get("aboutme")}</td>
             <td><input type="text" name="aboutMe" value="${requestScope.profile.aboutMe}"></td>
           </tr>

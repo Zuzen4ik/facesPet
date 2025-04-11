@@ -7,6 +7,7 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import md.faces.backend.dto.ProfilegetDto;
 import md.faces.backend.model.Gender;
 import md.faces.backend.model.Profile;
 
@@ -24,7 +25,7 @@ public class RegistrationController extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        req.setAttribute("profile", new Profile());
+        req.setAttribute("profile", new ProfilegetDto());
         req.getRequestDispatcher("WEB-INF/jsp/profile.jsp").forward(req, resp);
     }
 }

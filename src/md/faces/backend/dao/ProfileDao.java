@@ -5,6 +5,7 @@ import md.faces.backend.model.Gender;
 import md.faces.backend.model.Profile;
 import md.faces.backend.service.ProfileService;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -28,6 +29,7 @@ public class ProfileDao {
         profile.setLastName("Doe");
         profile.setEmail("john.doe@example.com");
         profile.setAboutMe("John like Java");
+        profile.setBirthDate(LocalDate.parse("2001-01-01"));
         profile.setGender(Gender.MALE);
         profStorage.put(profile.getId(), profile);
 
@@ -38,6 +40,7 @@ public class ProfileDao {
         profile1.setLastName("Desson");
         profile1.setEmail("maria.desson@example.com");
         profile1.setAboutMe("Maria like Java too");
+        profile1.setBirthDate(LocalDate.parse("2003-03-03"));
         profile1.setGender(Gender.FEMALE);
         profStorage.put(profile1.getId(), profile1);
         this.idStorage = new AtomicLong(2L);
