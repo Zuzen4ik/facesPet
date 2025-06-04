@@ -6,11 +6,10 @@ import md.faces.backend.model.Profile;
 import md.faces.backend.service.ProfileService;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.stream.Collectors;
 
 public class ProfileDao {
 
@@ -18,7 +17,6 @@ public class ProfileDao {
     private static final ProfileDao INSTANCE = new ProfileDao();
 
     private final ConcurrentHashMap<Long, Profile> profStorage;
-
     private final AtomicLong idStorage;
 
     public ProfileDao() {
@@ -28,6 +26,7 @@ public class ProfileDao {
         profile.setFirstName("John");
         profile.setLastName("Doe");
         profile.setEmail("john.doe@example.com");
+        profile.setPassword("password");
         profile.setAboutMe("John like Java");
         profile.setBirthDate(LocalDate.parse("2001-01-01"));
         profile.setGender(Gender.MALE);
@@ -39,6 +38,7 @@ public class ProfileDao {
         profile1.setFirstName("Maria");
         profile1.setLastName("Desson");
         profile1.setEmail("maria.desson@example.com");
+        profile.setPassword("password");
         profile1.setAboutMe("Maria like Java too");
         profile1.setBirthDate(LocalDate.parse("2003-03-03"));
         profile1.setGender(Gender.FEMALE);
@@ -47,32 +47,40 @@ public class ProfileDao {
     }
 
     public static ProfileDao getInstance() {
+
         return INSTANCE;
     }
 
     public Profile addProfile(Profile profile) {
-        long id = idStorage.incrementAndGet();
+        Long id = idStorage.incrementAndGet();
         profile.setId(id);
         profStorage.put(id, profile);
         return profile;
     }
 
     public Optional<Profile> getProfile(Long id) {
+
         return Optional.ofNullable(profStorage.get(id));
     }
 
     public List<Profile> getAllProfiles() {
+
         return new ArrayList<>(profStorage.values());
     }
 
     public void updateProfile(Profile profile) {
         Long id = profile.getId();
         if(id == null ) return;
-        profStorage.put(profile.getId(), profile);
+        profStorage.put(id, profile);
     }
 
-    public boolean deleteProfile(long id) {
+    public boolean deleteProfile(Long id) {
+        if(id == null) return false;
         return profStorage.remove(id) != null;
 
+    }
+
+    public Set<String> getAllEmails() {
+        return profStorage.values().stream().map(Profile::getEmail).collect(Collectors.toSet());
     }
 }

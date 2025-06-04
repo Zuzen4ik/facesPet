@@ -4,6 +4,6 @@ import md.faces.backend.model.Profile;
 
 public interface Mapper<From, To> {
 
-    To from(From obj);
-    To from(From obj, To to);
+    To mapFrom(From obj);
+    To mapFrom(From obj, To to);
 }

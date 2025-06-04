@@ -12,14 +12,13 @@
       <form method="post" action="/profile">
         <c:if test="${requestScope.profile.id != null}">
           <input type="hidden" name="_method" value="PUT">
+          <input type="hidden" name="id" value="${requestScope.profile.id}">
         </c:if>
 
         <table>
-          <td><input type="text" name="id" hidden value="${requestScope.profile.id}"></td>
-
           <tr>
             <td>${requestScope.wordBundle.get("Email")}</td>
-            <td><input type="email" name="email" value="${requestScope.profile.email}"></td>
+            <td><a href="/email?id=${requestScope.profile.id}">${requestScope.profile.email}</a></td>
           </tr>
           <tr>
             <td>${requestScope.wordBundle.get("firstname")}</td>
@@ -56,7 +55,7 @@
       </form>
 
     <c:if test="${requestScope.profile.id != null}">
-      <form method="post" action="/profile">
+      <form method="post" action="/registration">
         <input type="hidden" name="_method" value="DELETE">
         <input type="hidden" name="id" value="${requestScope.profile.id}">
         <button type="submit">${requestScope.wordBundle.get("delete")}</button>

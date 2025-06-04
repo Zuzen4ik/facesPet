@@ -1,12 +1,18 @@
 package md.faces.backend.service;
 
 import md.faces.backend.dao.ProfileDao;
-import md.faces.backend.dto.ProfilegetDto;
+import md.faces.backend.dto.ProfileGetDto;
+import md.faces.backend.dto.ProfileUpdateDto;
+import md.faces.backend.dto.RegistrationDto;
 import md.faces.backend.mapper.ProfileToDtoMapper;
-import md.faces.backend.mapper.DtoToProfileMapper;
+import md.faces.backend.mapper.ProfileUpdateDtoToProfileMapper;
+import md.faces.backend.mapper.RegistrationDtoToProfileMapper;
+import md.faces.backend.model.exceptions.DuplicateEmailException;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 
 public class ProfileService {
 
@@ -19,26 +25,41 @@ public class ProfileService {
     }
 
     private final ProfileToDtoMapper profileGetDtoMapper = ProfileToDtoMapper.getInstance();
+    private final RegistrationDtoToProfileMapper registrationDtoToProfileMapper = RegistrationDtoToProfileMapper.getInstance();
+    private final ProfileUpdateDtoToProfileMapper profileUpdateDtoToProfileMapper = ProfileUpdateDtoToProfileMapper.getInstance();
     private final ProfileDao profDao = ProfileDao.getInstance();
-    private final DtoToProfileMapper dtoToProfileMapper = DtoToProfileMapper.getInstance();
 
 
-    public Long save(ProfilegetDto profile) {
-        return profDao.addProfile(dtoToProfileMapper.from(profile)).getId();
+    public Long save(RegistrationDto profile) {
+        return profDao.addProfile(registrationDtoToProfileMapper.mapFrom(profile)).getId();
     }
 
-    public Optional<ProfilegetDto> findById(Long id) {
+    public Optional<ProfileGetDto> findById(Long id) {
         if (id == null) return Optional.empty();
-        return profDao.getProfile(id).map(profileGetDtoMapper::from);
+        return profDao.getProfile(id).map(profileGetDtoMapper::mapFrom);
     }
 
-    public List<ProfilegetDto> findAll() {
+    public List<ProfileGetDto> findAll() {
 
-        return profDao.getAllProfiles().stream().map(profileGetDtoMapper::from).toList();
+        return profDao.getAllProfiles().stream().map(profileGetDtoMapper::mapFrom).toList();
     }
 
-    public void update(ProfilegetDto profile) {
-        profDao.updateProfile(dtoToProfileMapper.from(profile));
+    public void update(ProfileUpdateDto dto) {
+
+        profDao.getProfile(dto.getId())
+                .ifPresent(profile -> {
+                            checkEmail(profile.getEmail(), dto.getEmail());
+                    profDao.updateProfile(profileUpdateDtoToProfileMapper.mapFrom(dto, profile));
+                        }
+                );
+    }
+
+    private void checkEmail(String email, String newEmail) {
+        if (newEmail == null) return;
+        Set<String> emails = profDao.getAllEmails();
+        if (!Objects.equals(email, newEmail) && emails.contains(newEmail)) {
+            throw new DuplicateEmailException();
+        }
     }
 
     public boolean delete(Long id) {
